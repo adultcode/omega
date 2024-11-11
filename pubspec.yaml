@@ -37,12 +37,14 @@ dependencies:
   cupertino_icons: ^1.0.8
   geolocator: 13.0.1
   permission_handler: any
-#  flutter_osm_plugin: any
+  realm: ^3.4.1
+  #  flutter_osm_plugin: any
   flutter_foreground_task : any
   awesome_notifications  : any
   provider: any
   dio: any
   path_provider: any
+  realm_dart: ^3.4.1
 
 dev_dependencies:
   flutter_test:
@@ -54,6 +56,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
+  build_runner: any
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

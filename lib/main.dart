@@ -4,12 +4,14 @@ import 'dart:isolate';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:gpsapp/feature/gps/model/location_model.dart';
 import 'package:gpsapp/feature/gps/provider/gps_state.dart';
 import 'package:gpsapp/feature/gps/services/foreground_service/foregroundService.dart';
 import 'package:gpsapp/feature/gps/services/foreground_service/mytask.dart';
 import 'package:provider/provider.dart';
 
 import 'dependency/get_it.dart';
+import 'feature/gps/services/db_service/location_db.dart';
 import 'feature/gps/services/files.dart';
 import 'feature/gps/services/local_req.dart';
 import 'feature/gps/services/location_service/location_permission.dart';
@@ -19,6 +21,7 @@ late AwesomeNotifications notifications;
 
 void main() async{
 
+  WidgetsFlutterBinding.ensureInitialized();
 
   /*
   init awesome notification
@@ -87,9 +90,12 @@ class _MyHomePageState extends State<MyHomePage> {
   ReceivePort? receivePort;
   late SomeTask taskObj;
 
+  late LocationDB _locationDB;
   @override
   initState(){
     super.initState();
+
+    _locationDB = LocationDB();
      FlutterForegroundTask.initCommunicationPort();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -120,7 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     //
     if(data is String && data == "gps"){
-      Provider.of<GPSState>(Depend.app_context!,listen: false).AddLocation("T: sd");
+     // Provider.of<GPSState>(Depend.app_context!,listen: false).AddLocation("T: sd");
     }
 
     if (data is Map<String, dynamic>) {
@@ -186,8 +192,12 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             SizedBox(height: 50,),
             Text("Test"),
-            ElevatedButton(onPressed: () {
-              startService();
+            ElevatedButton(onPressed: () async{
+
+            // var result = await _locationDB.AddLocation(LocationModel( 250,long: 41.05,lat: 85.045));
+             //print("DB result: $result");
+              _locationDB.DeleteDB();
+             // startService();
          //     Provider.of<GPSState>(Depend.app_context!,listen: false).AddLocation("T: sd");
 
             }, child: Text("Start")),
@@ -195,10 +205,10 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(height: 50,),
 
             ElevatedButton(onPressed: () async{
-              FlutterForegroundTask.stopService();
-             // Provider.of<GPSState>(Depend.app_context!,listen: false).AddLocation("T: sd");
+              //FlutterForegroundTask.stopService();
 
-             // FileHelper.createAndAppendText("hi");
+             await _locationDB.GetAllLocation();
+
             }, child: Text("Stop")),
 
             Consumer<GPSState>(builder: (context, value, child) {
