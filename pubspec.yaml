@@ -41,6 +41,8 @@ dependencies:
   flutter_foreground_task : any
   awesome_notifications  : any
   provider: any
+  dio: any
+  path_provider: any
 
 dev_dependencies:
   flutter_test:
