@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:isolate';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:gpsapp/feature/gps/model/location_model.dart';
 import 'package:gpsapp/feature/gps/provider/gps_state.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../dependency/get_it.dart';
+import '../db_service/location_db.dart';
 import '../files.dart';
 
 class ForegroundTaskService{
@@ -46,6 +48,7 @@ void startCallback() {
 
 class FirstTaskHandler extends TaskHandler {
   SendPort? _sendPort;
+  late LocationDB _locationDB;
 
   LocationSettings locationSettings = AndroidSettings(
     accuracy: LocationAccuracy.high,
@@ -54,6 +57,10 @@ class FirstTaskHandler extends TaskHandler {
     forceLocationManager: true,
     intervalDuration: const Duration(seconds: 1),
   );
+
+  FirstTaskHandler(){
+    _locationDB = LocationDB();
+  }
   @override
   Future<void> onDestroy(DateTime timestamp) async {
     // TODO: implement onDestroy
@@ -85,8 +92,9 @@ class FirstTaskHandler extends TaskHandler {
     });
     DateTime now = DateTime.now();
 
-    FileHelper.createAndAppendText("${now.minute}-${now.second}:${position!.latitude},${position!.latitude}");
+   // FileHelper.createAndAppendText("${now.minute}-${now.second}:${position!.latitude},${position!.latitude}");
 
+    await _locationDB.AddLocation(LocationModel(now.microsecondsSinceEpoch,lat: position.latitude,long: position.longitude));
     // Depend.app_context?.read<GPSState>().AddLocation("T: ${timestamp.minute}:${timestamp.second}");
   }
 

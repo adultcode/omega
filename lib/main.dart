@@ -196,8 +196,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
             // var result = await _locationDB.AddLocation(LocationModel( 250,long: 41.05,lat: 85.045));
              //print("DB result: $result");
-              _locationDB.DeleteDB();
-             // startService();
+           //   _locationDB.DeleteDB();
+              startService();
          //     Provider.of<GPSState>(Depend.app_context!,listen: false).AddLocation("T: sd");
 
             }, child: Text("Start")),
@@ -205,7 +205,7 @@ class _MyHomePageState extends State<MyHomePage> {
             SizedBox(height: 50,),
 
             ElevatedButton(onPressed: () async{
-              //FlutterForegroundTask.stopService();
+              FlutterForegroundTask.stopService();
 
              await _locationDB.GetAllLocation();
 
