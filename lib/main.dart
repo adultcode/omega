@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'dart:isolate';
-
+import 'package:latlong2/latlong.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:gpsapp/feature/gps/model/location_model.dart';
 import 'package:gpsapp/feature/gps/provider/gps_state.dart';
 import 'package:gpsapp/feature/gps/services/foreground_service/foregroundService.dart';
@@ -122,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _onReceiveTaskData(Object data) {
   //  print("Receive");
-    print("Data: $data");
+   // print("Data: $data");
 
     //
     if(data is String && data == "gps"){
@@ -134,7 +136,7 @@ class _MyHomePageState extends State<MyHomePage> {
       if (timestampMillis != null) {
         final DateTime timestamp =
         DateTime.fromMillisecondsSinceEpoch(timestampMillis, isUtc: true);
-        print('timestamp: ${timestamp.toString()}');
+       // print('timestamp: ${timestamp.toString()}');
       }
     }
     else{
@@ -183,39 +185,99 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
 
+    final List<LatLng> markerCoordinates = [
+      LatLng(53.7827922, -1.5547318),
+      LatLng(53.780416, -1.58270),
+    ];
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: ThemeData().colorScheme.primaryContainer,
+        title: Text("Location"),
       ),
       body: Center(
         child: Column(
           children: [
-            SizedBox(height: 50,),
-            Text("Test"),
-            ElevatedButton(onPressed: () async{
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                /*
+                start service
+                 */
+                ElevatedButton(onPressed: () async{
 
-            // var result = await _locationDB.AddLocation(LocationModel( 250,long: 41.05,lat: 85.045));
-             //print("DB result: $result");
-           //   _locationDB.DeleteDB();
-              startService();
-         //     Provider.of<GPSState>(Depend.app_context!,listen: false).AddLocation("T: sd");
+                  //   _locationDB.DeleteDB();
+                  startService();
+                  //     Provider.of<GPSState>(Depend.app_context!,listen: false).AddLocation("T: sd");
 
-            }, child: Text("Start")),
+                }, child: Text("شروع پیمایش")),
+                /*
+                stop service
+                 */
+                ElevatedButton(onPressed: () async{
+                  FlutterForegroundTask.stopService();
 
-            SizedBox(height: 50,),
+                  await _locationDB.GetAllLocation();
 
-            ElevatedButton(onPressed: () async{
-              FlutterForegroundTask.stopService();
+                }, child: Text("پایان پیمایش")),
+                /*
+                delete all records
+                 */
+                ElevatedButton(onPressed: () async{
+                  FlutterForegroundTask.stopService();
 
-             await _locationDB.GetAllLocation();
+                  await _locationDB.DeleteDB();
 
-            }, child: Text("Stop")),
+                }, child: Text("حذف اطلاعات")),
+              ],
+            ),
 
-            Consumer<GPSState>(builder: (context, value, child) {
-              return SingleChildScrollView(
-                child: Text("b "+value.location),
-              );
-            },)
+            Expanded(
+              child: FlutterMap(
+                options: MapOptions(
+
+                  initialCenter: LatLng(53.7827922, -1.5547318), // Initial map center
+                  initialZoom: 14.0, // Initial zoom level
+                ),
+                children: [
+                  TileLayer(
+                    urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    subdomains: ['a', 'b', 'c'],
+
+                  ),
+                  MarkerLayer(markers: [
+                    Marker(
+                      point: LatLng(53.7827922, -1.5547318),
+                      width: 64,
+                      height: 64,
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        child: Icon(Icons.location_on,color: Colors.red,size: 40,),
+                      )
+                    ),
+                    Marker(
+                        point: LatLng(53.7810552, -1.553734),
+                        width: 64,
+                        height: 64,
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          child: Icon(Icons.location_on,color: Colors.blue,size: 40,),
+                        )
+                    )
+                  ])
+
+                ],
+
+              )
+            ),
+
+
+
+            // Consumer<GPSState>(builder: (context, value, child) {
+            //   return SingleChildScrollView(
+            //     child: Text("b "+value.location),
+            //   );
+            // },)
           ],
         )
       ),

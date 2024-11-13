@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../../../../dependency/get_it.dart';
 import '../db_service/location_db.dart';
 import '../files.dart';
+import '../location_service/user_location.dart';
 
 class ForegroundTaskService{
   static ReceivePort? _receivePort;
@@ -49,6 +50,8 @@ void startCallback() {
 class FirstTaskHandler extends TaskHandler {
   SendPort? _sendPort;
   late LocationDB _locationDB;
+  LocationModel? last_location;
+  LocationModel? current_location;
 
   LocationSettings locationSettings = AndroidSettings(
     accuracy: LocationAccuracy.high,
@@ -77,36 +80,57 @@ class FirstTaskHandler extends TaskHandler {
       "timestampMillis": timestamp.millisecondsSinceEpoch,
     };
     FlutterForegroundTask.sendDataToMain(data);
-     FlutterForegroundTask.sendDataToMain("gps");
+   //  FlutterForegroundTask.sendDataToMain("gps");
 
     Position position = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
-    FlutterForegroundTask.sendDataToMain({
-      'latitude': position.latitude,
-      'longitude': position.longitude,
-      'timestamp': timestamp.millisecondsSinceEpoch,
-    });
-    print({
-      'latitude': position.latitude,
-      'longitude': position.longitude,
-      'timestamp': timestamp.millisecondsSinceEpoch,
-    });
     DateTime now = DateTime.now();
+
+    current_location = LocationModel(now.millisecondsSinceEpoch,lat: position.latitude,long: position.longitude);
+    if(last_location == null ){
+      // there is no previous record
+      print("Added-there is no previous record ");
+      await _locationDB.AddLocation(current_location!);
+      last_location  = current_location;
+
+    }
+    // checking distance or time
+    else if(UserLocation.calculateDistance(last_location!, current_location!)>50.0 ||
+        (now.millisecondsSinceEpoch - last_location!.timestamp!).abs()~/ (1000 )>=60){
+
+      // print("Distance: ${UserLocation.calculateDistance(last_location!, current_location!)}");
+      // print("Added location after 5sec- ${now.difference(DateTime.fromMillisecondsSinceEpoch(last_location!.timestamp!)).inDays}");
+      await _locationDB.AddLocation(current_location!);
+      last_location  = current_location;
+
+    }
+
+    // FlutterForegroundTask.sendDataToMain({
+    //   'latitude': position.latitude,
+    //   'longitude': position.longitude,
+    //   'timestamp': timestamp.millisecondsSinceEpoch,
+    // });
+    // print({
+    //   'latitude': position.latitude,
+    //   'longitude': position.longitude,
+    //   'timestamp': timestamp.millisecondsSinceEpoch,
+    // });
 
    // FileHelper.createAndAppendText("${now.minute}-${now.second}:${position!.latitude},${position!.latitude}");
 
-    await _locationDB.AddLocation(LocationModel(now.microsecondsSinceEpoch,lat: position.latitude,long: position.longitude));
-    // Depend.app_context?.read<GPSState>().AddLocation("T: ${timestamp.minute}:${timestamp.second}");
+   // await _locationDB.AddLocation(LocationModel(now.microsecondsSinceEpoch,lat: position.latitude,long: position.longitude));
   }
 
   @override
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
     // TODO: implement onStart
     print('onStart(starter: ${starter.name})');
+     // get latest location from DB
+    last_location = await _locationDB.GetLatestLocation();
 
+    print("-------- LAST locatioN: ${last_location!.timestamp!}");
      // This is used for communicating between our service and our app
     FlutterForegroundTask.sendDataToMain("startTask");
     _sendPort?.send("startTask22");
-    // sendPort?.send("startTask");
 
   }
 

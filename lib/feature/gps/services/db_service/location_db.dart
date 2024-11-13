@@ -21,6 +21,7 @@ class LocationDB{
   // Add Record
 Future<bool> AddLocation(LocationModel location)async{
 
+    print("Adding location method ---------");
     try{
       _realm.write(() {
         _realm.add(location);
@@ -62,5 +63,17 @@ Future<List<LocationModel>?> GetAllLocation()async{
     }
 }
 
+  // latest record
+  Future<LocationModel?> GetLatestLocation()async{
 
+    try{
+      print("-------------------------------- last data");
+      LocationModel? e =  _realm.all<LocationModel>().last;
+      print("${e.timestamp}-${e.long}");
+     return LocationModel(e.timestamp,lat: e.lat,long: e.long);
+    }catch(e){
+    //  return Future.error(e.toString());
+      return null;
+    }
+  }
 }
