@@ -9,13 +9,10 @@ import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:gpsapp/feature/gps/model/location_model.dart';
 import 'package:gpsapp/feature/gps/provider/gps_state.dart';
 import 'package:gpsapp/feature/gps/services/foreground_service/foregroundService.dart';
-import 'package:gpsapp/feature/gps/services/foreground_service/mytask.dart';
 import 'package:provider/provider.dart';
 
 import 'dependency/get_it.dart';
 import 'feature/gps/services/db_service/location_db.dart';
-import 'feature/gps/services/files.dart';
-import 'feature/gps/services/local_req.dart';
 import 'feature/gps/services/location_service/location_permission.dart';
 
 
@@ -25,38 +22,9 @@ void main() async{
 
   WidgetsFlutterBinding.ensureInitialized();
 
-  /*
-  init awesome notification
-   */
 
 
-  notifications = AwesomeNotifications();
-  var channel = NotificationChannel(
-      channelKey: "main_channel",
-      channelName: "Main",
-      importance: NotificationImportance.High,
-      channelDescription: "Notification foreground",
-      playSound:  true);
 
-  // request for notification
-  AwesomeNotifications().initialize(
-      null,
-      [
-        channel
-      ],
-      channelGroups: [
-        NotificationChannelGroup(channelGroupKey: "channel_group", channelGroupName: "Main group")
-      ],
-      debug:  true
-  );
-
-  // notification listener
-  // AwesomeNotifications().setListeners(
-  //   onActionReceivedMethod: NotificationController.onActionReceivedMethod,
-  //   onNotificationCreatedMethod: NotificationController.onNotificationCreatedMethod,
-  //   onNotificationDisplayedMethod: NotificationController.onNotificationDisplayedMethod,
-  //   onDismissActionReceivedMethod: NotificationController.onDismissActionReceivedMethod,
-  // );
 
   // foreground class init
   ForegroundTaskService.init();
@@ -90,14 +58,11 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   ReceivePort? receivePort;
-  late SomeTask taskObj;
 
-  late LocationDB _locationDB;
   @override
   initState(){
     super.initState();
 
-    _locationDB = LocationDB();
      FlutterForegroundTask.initCommunicationPort();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -107,42 +72,28 @@ class _MyHomePageState extends State<MyHomePage> {
      //
 
 
-   FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
+   // FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
     receivePort = FlutterForegroundTask.receivePort;
 
-
-    if (receivePort != null){
-      print("--------------- OK");
-
-
-    }else{
-      print("------- NULL");
-    }
-
-
   }
 
-  void _onReceiveTaskData(Object data) {
-  //  print("Receive");
-   // print("Data: $data");
-
-    //
-    if(data is String && data == "gps"){
-     // Provider.of<GPSState>(Depend.app_context!,listen: false).AddLocation("T: sd");
-    }
-
-    if (data is Map<String, dynamic>) {
-      final dynamic timestampMillis = data["timestampMillis"];
-      if (timestampMillis != null) {
-        final DateTime timestamp =
-        DateTime.fromMillisecondsSinceEpoch(timestampMillis, isUtc: true);
-       // print('timestamp: ${timestamp.toString()}');
-      }
-    }
-    else{
-      // print("Data: $data");
-    }
-  }
+  // void _onReceiveTaskData(Object data) {
+  //
+  //
+  //
+  //
+  //   if (data is Map<String, dynamic>) {
+  //     final dynamic timestampMillis = data["timestampMillis"];
+  //     if (timestampMillis != null) {
+  //       final DateTime timestamp =
+  //       DateTime.fromMillisecondsSinceEpoch(timestampMillis, isUtc: true);
+  //      // print('timestamp: ${timestamp.toString()}');
+  //     }
+  //   }
+  //   else{
+  //     // print("Data: $data");
+  //   }
+  // }
 
   void startService()async{
     // check permission
@@ -203,9 +154,7 @@ class _MyHomePageState extends State<MyHomePage> {
                  */
                 ElevatedButton(onPressed: () async{
 
-                  //   _locationDB.DeleteDB();
                   startService();
-                  //     Provider.of<GPSState>(Depend.app_context!,listen: false).AddLocation("T: sd");
 
                 }, child: Text("شروع ")),
                 /*
@@ -214,7 +163,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ElevatedButton(onPressed: () async{
                   FlutterForegroundTask.stopService();
 
-                  await _locationDB.GetAllLocation();
+                  // await _locationDB.GetAllLocation();
 
                 }, child: Text("پایان ")),
                 /*
@@ -227,7 +176,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
                 }, child: Text("نمایش ")),
                 ElevatedButton(onPressed: () async{
-                  //FlutterForegroundTask.stopService();
 
                   Provider.of<GPSState>(context,listen: false).DeleteRecords();
 

@@ -8,7 +8,6 @@ import 'package:provider/provider.dart';
 
 import '../../../../dependency/get_it.dart';
 import '../db_service/location_db.dart';
-import '../files.dart';
 import '../location_service/user_location.dart';
 
 class ForegroundTaskService{
@@ -76,18 +75,14 @@ class FirstTaskHandler extends TaskHandler {
   @override
   void onRepeatEvent(DateTime timestamp)async {
 
-    final Map<String, dynamic> data = {
-      "timestampMillis": timestamp.millisecondsSinceEpoch,
-    };
-    FlutterForegroundTask.sendDataToMain(data);
-   //  FlutterForegroundTask.sendDataToMain("gps");
+
 
     Position position = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
     DateTime now = DateTime.now();
 
 
-    current_location = LocationModel(now.millisecondsSinceEpoch,lat: 35.6731799,long: 51.3802027);
-   // current_location = LocationModel(now.millisecondsSinceEpoch,lat: position.latitude,long: position.longitude);
+     current_location = LocationModel(now.millisecondsSinceEpoch,lat: 35.6731799,long: 51.3802027);
+   //current_location = LocationModel(now.millisecondsSinceEpoch,lat: position.latitude,long: position.longitude);
     if(last_location == null ){
       // there is no previous record
       print("Added-there is no previous record ");
@@ -106,20 +101,7 @@ class FirstTaskHandler extends TaskHandler {
 
     }
 
-    // FlutterForegroundTask.sendDataToMain({
-    //   'latitude': position.latitude,
-    //   'longitude': position.longitude,
-    //   'timestamp': timestamp.millisecondsSinceEpoch,
-    // });
-    // print({
-    //   'latitude': position.latitude,
-    //   'longitude': position.longitude,
-    //   'timestamp': timestamp.millisecondsSinceEpoch,
-    // });
 
-   // FileHelper.createAndAppendText("${now.minute}-${now.second}:${position!.latitude},${position!.latitude}");
-
-   // await _locationDB.AddLocation(LocationModel(now.microsecondsSinceEpoch,lat: position.latitude,long: position.longitude));
   }
 
   @override
@@ -130,9 +112,7 @@ class FirstTaskHandler extends TaskHandler {
     last_location = await _locationDB.GetLatestLocation();
 
     print("-------- LAST locatioN: ${last_location!.timestamp!} lat: ${last_location!.lat} -- ${last_location!.long}");
-     // This is used for communicating between our service and our app
     FlutterForegroundTask.sendDataToMain("startTask");
-    _sendPort?.send("startTask22");
 
   }
 
@@ -145,7 +125,6 @@ class FirstTaskHandler extends TaskHandler {
   @override
   void onNotificationButtonPressed(String id) {
     print('onNotificationButtonPressed: $id');
-   // _sendPort?.send("killTask");
 
   }
 

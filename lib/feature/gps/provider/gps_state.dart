@@ -6,15 +6,11 @@ import 'package:gpsapp/feature/gps/model/location_model.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../services/db_service/location_db.dart';
-import '../services/files.dart';
-import '../services/local_req.dart';
 import '../services/location_service/location_permission.dart';
 
 class GPSState extends ChangeNotifier{
 
 
-  String location = "";
-  Position? _current_position;
   late LocationDB _locationDB;
 
   List<LocationModel>? _location_list = [];
