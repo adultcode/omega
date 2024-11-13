@@ -185,10 +185,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
 
-    final List<LatLng> markerCoordinates = [
-      LatLng(53.7827922, -1.5547318),
-      LatLng(53.780416, -1.58270),
-    ];
+
 
     return Scaffold(
       appBar: AppBar(
@@ -210,7 +207,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   startService();
                   //     Provider.of<GPSState>(Depend.app_context!,listen: false).AddLocation("T: sd");
 
-                }, child: Text("شروع پیمایش")),
+                }, child: Text("شروع ")),
                 /*
                 stop service
                  */
@@ -219,68 +216,53 @@ class _MyHomePageState extends State<MyHomePage> {
 
                   await _locationDB.GetAllLocation();
 
-                }, child: Text("پایان پیمایش")),
+                }, child: Text("پایان ")),
                 /*
                 delete all records
                  */
                 ElevatedButton(onPressed: () async{
                   FlutterForegroundTask.stopService();
 
-                  await _locationDB.DeleteDB();
+                  Provider.of<GPSState>(context,listen: false).MapMarkers();
 
-                }, child: Text("حذف اطلاعات")),
+                }, child: Text("نمایش ")),
+                ElevatedButton(onPressed: () async{
+                  //FlutterForegroundTask.stopService();
+
+                  Provider.of<GPSState>(context,listen: false).DeleteRecords();
+
+                }, child: Text("ریست ")),
               ],
             ),
 
             Expanded(
-              child: FlutterMap(
-                options: MapOptions(
+              child:
+              Consumer<GPSState>(builder: (context, value, child) {
+                print("Markers: ${value.markers.toString()}");
+                 return   FlutterMap(
+                  options: MapOptions(
 
-                  initialCenter: LatLng(53.7827922, -1.5547318), // Initial map center
-                  initialZoom: 14.0, // Initial zoom level
-                ),
-                children: [
-                  TileLayer(
-                    urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                    subdomains: ['a', 'b', 'c'],
-
+                    initialCenter: LatLng(35.6910624,51.3852453), // Initial map center
+                    initialZoom: 10.0, // Initial zoom level
                   ),
-                  MarkerLayer(markers: [
-                    Marker(
-                      point: LatLng(53.7827922, -1.5547318),
-                      width: 64,
-                      height: 64,
-                      alignment: Alignment.centerLeft,
-                      child: Container(
-                        child: Icon(Icons.location_on,color: Colors.red,size: 40,),
-                      )
-                    ),
-                    Marker(
-                        point: LatLng(53.7810552, -1.553734),
-                        width: 64,
-                        height: 64,
-                        alignment: Alignment.centerLeft,
-                        child: Container(
-                          child: Icon(Icons.location_on,color: Colors.blue,size: 40,),
-                        )
-                    )
-                  ])
+                  children: [
+                    TileLayer(
+                      urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                      subdomains: ['a', 'b', 'c'],
 
-                ],
+                    ),
+                    MarkerLayer(markers: value.markers!)
+                  ],
+
+                );
+              },)
 
               )
+          ]
+            ),
             ),
 
 
-
-            // Consumer<GPSState>(builder: (context, value, child) {
-            //   return SingleChildScrollView(
-            //     child: Text("b "+value.location),
-            //   );
-            // },)
-          ],
-        )
-      ),
     );
   }
 }

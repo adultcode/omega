@@ -21,6 +21,8 @@ class LocationDB{
   // Add Record
 Future<bool> AddLocation(LocationModel location)async{
 
+    // location.lat = 35.6796902;
+    // location.long = 51.3798594;
     print("Adding location method ---------");
     try{
       _realm.write(() {
@@ -55,7 +57,7 @@ Future<List<LocationModel>?> GetAllLocation()async{
     try{
       print("All data");
       return  _realm.all<LocationModel>().map((e) {
-        print("Time: ${e.timestamp} - Long:${e.long}");
+        print("Time: ${e.timestamp} - lat:${e.lat} long:${e.long} ");
         return LocationModel(e.timestamp,lat: e.lat,long: e.long);
       }).toList();
     }catch(e){
